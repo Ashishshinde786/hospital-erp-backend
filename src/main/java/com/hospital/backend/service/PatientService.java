@@ -447,4 +447,14 @@ public class PatientService {
 				.build();
 	}
 
+	/*
+	 * ========================================== GET PATIENTS BY BLOOD GROUP
+	 * ==========================================
+	 */
+	@Transactional(readOnly = true)
+	public List<PatientDTO> getPatientsByBloodGroup(String bloodGroup) {
+
+		return patientRepository.findByBloodGroup(bloodGroup).stream().map(this::toDTO).collect(Collectors.toList());
+	}
+
 }
