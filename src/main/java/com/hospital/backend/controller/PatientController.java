@@ -192,4 +192,25 @@ public class PatientController {
 		return ResponseEntity.ok(ApiResponse.success(patientService.getTotalCount(), "Count fetched"));
 	}
 
+	/*
+	 * GET
+	 * 
+	 * /api/patients/blood-group?group=O+
+	 * 
+	 * Fetch patients by blood group.
+	 * 
+	 * Useful for:
+	 * 
+	 * Emergency
+	 * 
+	 * Blood matching
+	 * 
+	 * Medical filtering
+	 */
+	@GetMapping("/blood-group")
+	public ResponseEntity<ApiResponse<List<PatientDTO>>> getByBloodGroup(@RequestParam String group) {
+		return ResponseEntity.ok(
+				ApiResponse.success(patientService.getPatientsByBloodGroup(group), "Patients fetched by blood group"));
+	}
+
 }
