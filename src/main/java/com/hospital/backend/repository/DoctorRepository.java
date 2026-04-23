@@ -178,4 +178,10 @@ public interface DoctorRepository
 
 	);
 
+	/*
+	 * ========================================== SEARCH BY FIRST NAME OR LAST NAME
+	 * ==========================================
+	 */
+	List<Doctor> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName);
+
 }

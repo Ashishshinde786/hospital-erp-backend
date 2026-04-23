@@ -190,4 +190,23 @@ public class DoctorController {
 		return ResponseEntity.ok(ApiResponse.success(null, "Doctor deleted successfully"));
 	}
 
+	/*
+	 * SEARCH doctors by name
+	 * 
+	 * Example:
+	 * 
+	 * /api/doctors/search?name=ash
+	 * 
+	 * Finds:
+	 * 
+	 * Ashish
+	 * 
+	 * Ashok
+	 */
+	@GetMapping("/search")
+	public ResponseEntity<ApiResponse<List<DoctorDTO>>> searchByName(@RequestParam String name) {
+		return ResponseEntity
+				.ok(ApiResponse.success(doctorService.searchDoctorsByName(name), "Doctors search completed"));
+	}
+
 }
