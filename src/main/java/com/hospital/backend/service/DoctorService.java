@@ -493,4 +493,15 @@ public class DoctorService {
 				.build();
 	}
 
+	/*
+	 * ========================================== SEARCH DOCTORS BY NAME
+	 * ==========================================
+	 */
+	@Transactional(readOnly = true)
+	public List<DoctorDTO> searchDoctorsByName(String name) {
+
+		return doctorRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name).stream()
+				.map(this::toDTO).collect(Collectors.toList());
+	}
+
 }
