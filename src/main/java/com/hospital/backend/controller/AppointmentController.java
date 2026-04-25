@@ -287,5 +287,26 @@ public class AppointmentController {
 	) {
 		return ResponseEntity.ok(ApiResponse.success(appointmentService.getByDateRange(start, end), "Fetched"));
 	}
+	
+	
+	/*
+	 * GET today's appointment count
+	 * 
+	 * Dashboard API
+	 * 
+	 * Example:
+	 * 
+	 * /api/appointments/today-count
+	 */
+	@GetMapping("/today-count")
+	public ResponseEntity<ApiResponse<Long>> getTodayCount() {
+
+	    return ResponseEntity.ok(
+	            ApiResponse.success(
+	                    appointmentService.getTodayCount(),
+	                    "Today's appointment count fetched"
+	            )
+	    );
+	}
 
 }
