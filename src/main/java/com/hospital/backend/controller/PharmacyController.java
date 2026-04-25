@@ -238,4 +238,32 @@ public class PharmacyController {
 		return ResponseEntity.ok(ApiResponse.success(null, "Medicine deactivated"));
 	}
 
+	
+	/*
+	 * GET expired medicines
+	 * 
+	 * Example:
+	 * 
+	 * /api/pharmacy/expired
+	 * 
+	 * Finds medicines where expiry date < today
+	 * 
+	 * Used for:
+	 * 
+	 * Safety
+	 * 
+	 * Compliance
+	 * 
+	 * Inventory cleanup
+	 */
+	@GetMapping("/expired")
+	public ResponseEntity<ApiResponse<List<MedicineDTO>>> getExpiredMedicines() {
+
+	    return ResponseEntity.ok(
+	            ApiResponse.success(
+	                    pharmacyService.getExpiredMedicines(),
+	                    "Expired medicines fetched"
+	            )
+	    );
+	}
 }

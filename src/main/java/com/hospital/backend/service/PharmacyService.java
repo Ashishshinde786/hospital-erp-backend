@@ -431,5 +431,20 @@ public class PharmacyService {
 
 				.build();
 	}
+	
+	/*
+	 * =========================================
+	 * GET EXPIRED MEDICINES
+	 * =========================================
+	 */
+	@Transactional(readOnly = true)
+	public List<MedicineDTO> getExpiredMedicines() {
+
+	    return medicineRepository
+	            .findExpiredMedicines()
+	            .stream()
+	            .map(this::toDTO)
+	            .collect(Collectors.toList());
+	}
 
 }
