@@ -502,4 +502,14 @@ public class BillingService {
 
 	}
 
+	/*
+	 * =============================================== GET INVOICES BY STATUS
+	 * ===============================================
+	 */
+	@Transactional(readOnly = true)
+	public List<InvoiceDTO> getInvoicesByStatus(PaymentStatus status) {
+
+		return invoiceRepository.findByPaymentStatus(status).stream().map(this::toDTO).collect(Collectors.toList());
+	}
+
 }
