@@ -1,502 +1,114 @@
 package com.hospital.backend.service;
 
 import com.hospital.backend.dto.DoctorDTO;
-
 import com.hospital.backend.entity.Doctor;
 import com.hospital.backend.entity.User;
-
 import com.hospital.backend.exception.ResourceNotFoundException;
-
 import com.hospital.backend.repository.DoctorRepository;
 import com.hospital.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
 import java.util.stream.Collectors;
 
-/*
-=======================================================
-
-DOCTOR SERVICE
-
-Business Logic Layer
-
-Handles:
-
-1 Create doctor
-
-2 Update doctor
-
-3 Delete doctor
-
-4 Find doctor
-
-5 Search by specialization
-
-6 Find available doctors
-
-7 Link doctor to user login account
-
-=======================================================
-*/
-
 @Service
-
-/*
- * Spring creates object automatically
- * 
- * Inject into controller.
- */
 @RequiredArgsConstructor
-
-/*
- * Creates constructor automatically for final dependencies.
- */
 @Transactional
-
-/*
- * Default transaction for all methods.
- * 
- * If DB operation fails
- * 
- * rollback.
- */
 public class DoctorService {
 
-	/*
-	 * ========================================== DEPENDENCIES
-	 * ==========================================
-	 */
-
-	/*
-	 * Handles doctor table.
-	 */
 	private final DoctorRepository doctorRepository;
-
-	/*
-	 * Needed when linking doctor with system user account.
-	 */
 	private final UserRepository userRepository;
 
-	/*
-	 * ========================================== GET ALL DOCTORS
-	 * ==========================================
-	 */
+	// ✅ GET ALL DOCTORS
 	@Transactional(readOnly = true)
-
-	/*
-	 * readOnly improves performance for select operations.
-	 */
 	public List<DoctorDTO> getAllDoctors() {
-
-		return doctorRepository
-
-				.findAll()
-
-				.stream()
-
-				.map(this::toDTO)
-
-				.collect(Collectors.toList());
+		return doctorRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
 	}
 
-	/*
-	 * ========================================== GET SINGLE DOCTOR
-	 * ==========================================
-	 */
+	// ✅ GET DOCTOR BY ID
 	@Transactional(readOnly = true)
-
 	public DoctorDTO getDoctorById(Long id) {
-
-		return toDTO(
-
-				findDoctorById(id)
-
-		);
+		return toDTO(findDoctorById(id));
 	}
 
-	/*
-	 * ========================================== GET AVAILABLE DOCTORS
-	 * 
-	 * available=true ==========================================
-	 */
+	// ✅ GET AVAILABLE DOCTORS
 	@Transactional(readOnly = true)
-
 	public List<DoctorDTO> getAvailableDoctors() {
-
-		return doctorRepository
-
-				.findByAvailableTrue()
-
-				.stream()
-
-				.map(this::toDTO)
-
-				.collect(Collectors.toList());
+		return doctorRepository.findByAvailableTrue().stream().map(this::toDTO).collect(Collectors.toList());
 	}
 
-	/*
-	 * ========================================== SEARCH BY SPECIALIZATION
-	 * 
-	 * Example:
-	 * 
-	 * CARDIOLOGY
-	 * 
-	 * DERMATOLOGY
-	 * 
-	 * NEUROLOGY ==========================================
-	 */
+	// ✅ GET BY SPECIALIZATION
 	@Transactional(readOnly = true)
-
-	public List<DoctorDTO>
-
-			getDoctorsBySpecialization(
-
-					String specialization
-
-	) {
-
-		return doctorRepository
-
-				.findBySpecializationIgnoreCase(
-
-						specialization
-
-				)
-
-				.stream()
-
-				.map(this::toDTO)
-
+	public List<DoctorDTO> getDoctorsBySpecialization(String specialization) {
+		return doctorRepository.findBySpecializationIgnoreCase(specialization).stream().map(this::toDTO)
 				.collect(Collectors.toList());
 	}
 
-	/*
-	 * ========================================== CREATE DOCTOR
-	 * ==========================================
-	 * 
-	 * Steps
-	 * 
-	 * 1 convert DTO -> Entity
-	 * 
-	 * 2 optionally link User
-	 * 
-	 * 3 save doctor
-	 */
-	public DoctorDTO createDoctor(
+	// ✅ CREATE DOCTOR
+	public DoctorDTO createDoctor(DoctorDTO dto) {
 
-			DoctorDTO dto
+		Doctor doctor = toEntity(dto);
 
-	) {
-
-		/*
-		 * STEP 1
-		 * 
-		 * Convert DTO into entity.
-		 */
-		Doctor doctor =
-
-				toEntity(dto);
-
-		/*
-		 * STEP 2
-		 * 
-		 * Optional link:
-		 * 
-		 * doctor -> user login
-		 * 
-		 * Example
-		 * 
-		 * Doctor:
-		 * 
-		 * Dr Smith
-		 * 
-		 * linked to:
-		 * 
-		 * username=drsmith
-		 */
-		if (
-
-		dto.getUserId() != null
-
-		) {
-
-			User user =
-
-					userRepository
-
-							.findById(
-
-									dto.getUserId()
-
-							)
-
-							.orElseThrow(
-
-									() -> new ResourceNotFoundException(
-
-											"User not found"
-
-									));
-
-			/*
-			 * set relationship
-			 * 
-			 * doctor belongs to user
-			 */
+		// Link doctor with user (optional)
+		if (dto.getUserId() != null) {
+			User user = userRepository.findById(dto.getUserId())
+					.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 			doctor.setUser(user);
-
 		}
 
-		/*
-		 * STEP 3
-		 * 
-		 * Save doctor
-		 */
-		return toDTO(
-
-				doctorRepository.save(
-
-						doctor
-
-				)
-
-		);
-
+		return toDTO(doctorRepository.save(doctor));
 	}
 
-	/*
-	 * ========================================== UPDATE DOCTOR
-	 * ==========================================
-	 */
-	public DoctorDTO updateDoctor(
+	// ✅ UPDATE DOCTOR
+	public DoctorDTO updateDoctor(Long id, DoctorDTO dto) {
 
-			Long id,
+		Doctor existing = findDoctorById(id);
 
-			DoctorDTO dto
+		existing.setFirstName(dto.getFirstName());
+		existing.setLastName(dto.getLastName());
+		existing.setSpecialization(dto.getSpecialization());
+		existing.setLicenseNumber(dto.getLicenseNumber());
+		existing.setEmail(dto.getEmail());
+		existing.setPhone(dto.getPhone());
+		existing.setQualification(dto.getQualification());
+		existing.setBio(dto.getBio());
+		existing.setAvailable(dto.isAvailable());
 
-	) {
-
-		/*
-		 * find existing doctor
-		 */
-		Doctor existing =
-
-				findDoctorById(id);
-
-		/*
-		 * update fields
-		 */
-		existing.setFirstName(
-
-				dto.getFirstName()
-
-		);
-
-		existing.setLastName(
-
-				dto.getLastName()
-
-		);
-
-		existing.setSpecialization(
-
-				dto.getSpecialization()
-
-		);
-
-		existing.setLicenseNumber(
-
-				dto.getLicenseNumber()
-
-		);
-
-		existing.setEmail(
-
-				dto.getEmail()
-
-		);
-
-		existing.setPhone(
-
-				dto.getPhone()
-
-		);
-
-		existing.setQualification(
-
-				dto.getQualification()
-
-		);
-
-		existing.setBio(
-
-				dto.getBio()
-
-		);
-
-		existing.setAvailable(
-
-				dto.isAvailable()
-
-		);
-
-		/*
-		 * save updated doctor
-		 */
-		return toDTO(
-
-				doctorRepository.save(
-
-						existing
-
-				));
+		return toDTO(doctorRepository.save(existing));
 	}
 
-	/*
-	 * ========================================== DELETE DOCTOR
-	 * ==========================================
-	 */
-	public void deleteDoctor(
-
-			Long id) {
-
-		doctorRepository.delete(
-
-				findDoctorById(id)
-
-		);
-
+	// ✅ DELETE DOCTOR
+	public void deleteDoctor(Long id) {
+		doctorRepository.delete(findDoctorById(id));
 	}
 
-	/*
-	 * ========================================== COUNT DOCTORS
-	 * ==========================================
-	 */
+	// ✅ COUNT DOCTORS
 	public long getTotalCount() {
-
 		return doctorRepository.count();
 	}
 
-	/*
-	 * ========================================== HELPER
-	 * 
-	 * FIND DOCTOR ==========================================
-	 */
-	private Doctor findDoctorById(
+	// 🔥 NEW: FILTER BY AVAILABILITY
+	@Transactional(readOnly = true)
+	public List<DoctorDTO> getDoctorsByAvailability(boolean available) {
 
-			Long id
-
-	) {
-
-		return doctorRepository
-
-				.findById(id)
-
-				.orElseThrow(
-
-						() -> new ResourceNotFoundException(
-
-								"Doctor not found with id:" + id
-
-						));
+		return doctorRepository.findAll().stream().filter(d -> d.isAvailable() == available).map(this::toDTO)
+				.collect(Collectors.toList());
 	}
 
-	/*
-	 * ========================================== ENTITY -> DTO
-	 * 
-	 * Database -> API response ==========================================
-	 */
-	private DoctorDTO toDTO(
+	// 🔥 NEW: UPDATE AVAILABILITY (VERY IMPORTANT IN REAL WORLD)
+	public DoctorDTO updateAvailability(Long id, boolean available) {
 
-			Doctor d
+		Doctor doctor = findDoctorById(id);
+		doctor.setAvailable(available);
 
-	) {
-
-		return DoctorDTO.builder()
-
-				.id(d.getId())
-
-				.firstName(d.getFirstName())
-
-				.lastName(d.getLastName())
-
-				.specialization(d.getSpecialization())
-
-				.licenseNumber(d.getLicenseNumber())
-
-				.email(d.getEmail())
-
-				.phone(d.getPhone())
-
-				.qualification(d.getQualification())
-
-				.bio(d.getBio())
-
-				.available(d.isAvailable())
-
-				/*
-				 * return linked user id
-				 */
-				.userId(
-
-						d.getUser() != null
-
-								?
-
-								d.getUser().getId()
-
-								:
-
-								null)
-
-				.build();
+		return toDTO(doctorRepository.save(doctor));
 	}
 
-	/*
-	 * ========================================== DTO -> ENTITY
-	 * 
-	 * Request -> database object ==========================================
-	 */
-	private Doctor toEntity(
-
-			DoctorDTO dto
-
-	) {
-
-		return Doctor.builder()
-
-				.firstName(dto.getFirstName())
-
-				.lastName(dto.getLastName())
-
-				.specialization(dto.getSpecialization())
-
-				.licenseNumber(dto.getLicenseNumber())
-
-				.email(dto.getEmail())
-
-				.phone(dto.getPhone())
-
-				.qualification(dto.getQualification())
-
-				.bio(dto.getBio())
-
-				.available(dto.isAvailable())
-
-				.build();
-	}
-
-	/*
-	 * ========================================== SEARCH DOCTORS BY NAME
-	 * ==========================================
-	 */
+	// ✅ SEARCH DOCTORS BY NAME
 	@Transactional(readOnly = true)
 	public List<DoctorDTO> searchDoctorsByName(String name) {
 
@@ -504,4 +116,24 @@ public class DoctorService {
 				.map(this::toDTO).collect(Collectors.toList());
 	}
 
+	// ================= HELPER METHODS =================
+
+	private Doctor findDoctorById(Long id) {
+		return doctorRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Doctor not found with id: " + id));
+	}
+
+	private DoctorDTO toDTO(Doctor d) {
+		return DoctorDTO.builder().id(d.getId()).firstName(d.getFirstName()).lastName(d.getLastName())
+				.specialization(d.getSpecialization()).licenseNumber(d.getLicenseNumber()).email(d.getEmail())
+				.phone(d.getPhone()).qualification(d.getQualification()).bio(d.getBio()).available(d.isAvailable())
+				.userId(d.getUser() != null ? d.getUser().getId() : null).build();
+	}
+
+	private Doctor toEntity(DoctorDTO dto) {
+		return Doctor.builder().firstName(dto.getFirstName()).lastName(dto.getLastName())
+				.specialization(dto.getSpecialization()).licenseNumber(dto.getLicenseNumber()).email(dto.getEmail())
+				.phone(dto.getPhone()).qualification(dto.getQualification()).bio(dto.getBio())
+				.available(dto.isAvailable()).build();
+	}
 }

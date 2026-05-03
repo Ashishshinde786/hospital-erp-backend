@@ -1,269 +1,97 @@
 package com.hospital.backend.controller;
 
-/*
-=========================================================
-PURPOSE OF THIS CLASS
-=========================================================
-
-This class handles Pharmacy APIs.
-
-It manages medicine inventory.
-
-This is basically:
-
-Inventory Management Controller
-
-or
-
-Pharmacy Module Controller
-
-
-It handles:
-
-Add medicine
-
-Get medicines
-
-Search medicines
-
-Update medicine
-
-Update stock
-
-Check low stock
-
-Deactivate medicine
-
----------------------------------------------------------
-
-ERP Modules connected to this:
-
-Billing
-
-Prescription
-
-Purchasing
-
-Inventory
-
-Doctor consultation
-
-=========================================================
-*/
-
 import com.hospital.backend.dto.ApiResponse;
-
 import com.hospital.backend.dto.MedicineDTO;
-
 import com.hospital.backend.service.PharmacyService;
 
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
-
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/*
-Marks as REST controller.
-
-Returns JSON.
-*/
+@Slf4j
 @RestController
-
-/*
- * Base route:
- * 
- * /api/pharmacy
- */
 @RequestMapping("/api/pharmacy")
-
-/*
- * Constructor injection
- */
 @RequiredArgsConstructor
 public class PharmacyController {
 
-	/*
-	 * Relationship:
-	 * 
-	 * PharmacyController
-	 * 
-	 * -> PharmacyService
-	 * 
-	 * -> MedicineRepository
-	 * 
-	 * -> medicines table
-	 */
 	private final PharmacyService pharmacyService;
 
-	/*
-	 * GET
-	 * 
-	 * Fetch all active medicines.
-	 * 
-	 * GET /api/pharmacy
-	 */
+	// GET ALL
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<MedicineDTO>>> getAll() {
+		log.info("API CALL: Get all medicines");
 		return ResponseEntity.ok(ApiResponse.success(pharmacyService.getAllMedicines(), "Medicines fetched"));
 	}
 
-	/*
-	 * GET
-	 * 
-	 * Fetch medicine by ID
-	 * 
-	 * /api/pharmacy/5
-	 */
+	// GET BY ID
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<MedicineDTO>> getById(@PathVariable Long id) {
+		log.info("API CALL: Get medicine by id {}", id);
 		return ResponseEntity.ok(ApiResponse.success(pharmacyService.getMedicineById(id), "Medicine fetched"));
 	}
 
-	/*
-	 * SEARCH medicine.
-	 * 
-	 * Example:
-	 * 
-	 * /api/pharmacy/search?name=Paracetamol
-	 * 
-	 * Used by:
-	 * 
-	 * Pharmacist
-	 * 
-	 * Doctor
-	 * 
-	 * Billing
-	 */
+	// SEARCH
 	@GetMapping("/search")
-	public ResponseEntity<ApiResponse<List<MedicineDTO>>> search(
-			/*
-			 * Query parameter
-			 * 
-			 * name=Paracetamol
-			 */
-			@RequestParam String name) {
+	public ResponseEntity<ApiResponse<List<MedicineDTO>>> search(@RequestParam String name) {
+		log.info("API CALL: Search medicines name={}", name);
 		return ResponseEntity.ok(ApiResponse.success(pharmacyService.searchMedicines(name), "Search completed"));
 	}
 
-	/*
-	 * Low stock alert endpoint.
-	 * 
-	 * ERP inventory feature.
-	 * 
-	 * Example:
-	 * 
-	 * Find medicines with stock < 10
-	 * 
-	 * /api/pharmacy/low-stock
-	 */
+	// LOW STOCK
 	@GetMapping("/low-stock")
 	public ResponseEntity<ApiResponse<List<MedicineDTO>>> getLowStock(
-			/*
-			 * If user does not pass threshold, default = 10
-			 */
 			@RequestParam(defaultValue = "10") int threshold) {
+
+		log.info("API CALL: Get low stock medicines threshold={}", threshold);
+
 		return ResponseEntity.ok(ApiResponse.success(pharmacyService.getLowStockMedicines(threshold), "Fetched"));
 	}
 
-	/*
-	 * POST
-	 * 
-	 * Add new medicine.
-	 * 
-	 * Example:
-	 * 
-	 * Add Paracetamol.
-	 */
+	// CREATE
 	@PostMapping
 	public ResponseEntity<ApiResponse<MedicineDTO>> create(@Valid @RequestBody MedicineDTO dto) {
+		log.info("API CALL: Create medicine {}", dto.getName());
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(ApiResponse.success(pharmacyService.createMedicine(dto), "Medicine created"));
 	}
 
-	/*
-	 * Update medicine details.
-	 * 
-	 * Example:
-	 * 
-	 * Change price
-	 * 
-	 * Change manufacturer
-	 * 
-	 * Change expiry
-	 */
+	// UPDATE
 	@PutMapping("/{id}")
 	public ResponseEntity<ApiResponse<MedicineDTO>> update(@PathVariable Long id, @Valid @RequestBody MedicineDTO dto) {
+
+		log.info("API CALL: Update medicine id {}", id);
+
 		return ResponseEntity.ok(ApiResponse.success(pharmacyService.updateMedicine(id, dto), "Medicine updated"));
 	}
 
-	/*
-	 * Update stock quantity.
-	 * 
-	 * Very important inventory API.
-	 * 
-	 * Example:
-	 * 
-	 * Received 50 tablets.
-	 * 
-	 * Increase stock.
-	 */
+	// UPDATE STOCK
 	@PatchMapping("/{id}/stock")
 	public ResponseEntity<ApiResponse<MedicineDTO>> updateStock(@PathVariable Long id, @RequestParam int quantity) {
+
+		log.info("API CALL: Update stock id {} quantity {}", id, quantity);
+
 		return ResponseEntity.ok(ApiResponse.success(pharmacyService.updateStock(id, quantity), "Stock updated"));
 	}
 
-	/*
-	 * Delete medicine.
-	 * 
-	 * But actually:
-	 * 
-	 * Soft delete.
-	 * 
-	 * It deactivates medicine.
-	 * 
-	 * Does NOT remove row.
-	 * 
-	 * Very important ERP concept.
-	 */
+	// DELETE (SOFT)
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+		log.warn("API CALL: Deactivate medicine id {}", id);
 		pharmacyService.deleteMedicine(id);
 		return ResponseEntity.ok(ApiResponse.success(null, "Medicine deactivated"));
 	}
 
-	
-	/*
-	 * GET expired medicines
-	 * 
-	 * Example:
-	 * 
-	 * /api/pharmacy/expired
-	 * 
-	 * Finds medicines where expiry date < today
-	 * 
-	 * Used for:
-	 * 
-	 * Safety
-	 * 
-	 * Compliance
-	 * 
-	 * Inventory cleanup
-	 */
+	// EXPIRED
 	@GetMapping("/expired")
 	public ResponseEntity<ApiResponse<List<MedicineDTO>>> getExpiredMedicines() {
-
-	    return ResponseEntity.ok(
-	            ApiResponse.success(
-	                    pharmacyService.getExpiredMedicines(),
-	                    "Expired medicines fetched"
-	            )
-	    );
+		log.info("API CALL: Get expired medicines");
+		return ResponseEntity
+				.ok(ApiResponse.success(pharmacyService.getExpiredMedicines(), "Expired medicines fetched"));
 	}
 }
