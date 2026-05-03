@@ -70,4 +70,20 @@ public class BillingController {
 		log.info("API CALL: Get total revenue");
 		return ResponseEntity.ok(ApiResponse.success(billingService.getTotalRevenue(), "Revenue fetched"));
 	}
+
+	/*
+	 * GET invoices by payment status
+	 *
+	 * Example:
+	 *
+	 * /api/billing/status?status=PENDING /api/billing/status?status=PAID
+	 */
+	@GetMapping("/status")
+	public ResponseEntity<ApiResponse<List<InvoiceDTO>>> getByStatus(
+			@RequestParam com.hospital.backend.entity.Invoice.PaymentStatus status) {
+
+		return ResponseEntity
+				.ok(ApiResponse.success(billingService.getInvoicesByStatus(status), "Invoices fetched by status"));
+	}
+
 }

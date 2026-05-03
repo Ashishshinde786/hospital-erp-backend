@@ -128,4 +128,15 @@ public class BillingService {
 				.totalAmount(inv.getTotalAmount()).paidAmount(inv.getPaidAmount()).paymentStatus(inv.getPaymentStatus())
 				.paymentMethod(inv.getPaymentMethod()).build();
 	}
+
+	/*
+	 * =============================================== GET INVOICES BY STATUS
+	 * ===============================================
+	 */
+	@Transactional(readOnly = true)
+	public List<InvoiceDTO> getInvoicesByStatus(PaymentStatus status) {
+
+		return invoiceRepository.findByPaymentStatus(status).stream().map(this::toDTO).collect(Collectors.toList());
+	}
+
 }
