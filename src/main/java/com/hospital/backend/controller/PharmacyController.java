@@ -1,79 +1,20 @@
 package com.hospital.backend.controller;
 
-/*
-=========================================================
-PURPOSE OF THIS CLASS
-=========================================================
-
-This class handles Pharmacy APIs.
-
-It manages medicine inventory.
-
-This is basically:
-
-Inventory Management Controller
-
-or
-
-Pharmacy Module Controller
-
-
-It handles:
-
-Add medicine
-
-Get medicines
-
-Search medicines
-
-Update medicine
-
-Update stock
-
-Check low stock
-
-Deactivate medicine
-
----------------------------------------------------------
-
-ERP Modules connected to this:
-
-Billing
-
-Prescription
-
-Purchasing
-
-Inventory
-
-Doctor consultation
-
-=========================================================
-*/
-
 import com.hospital.backend.dto.ApiResponse;
-
 import com.hospital.backend.dto.MedicineDTO;
-
 import com.hospital.backend.service.PharmacyService;
 
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
-
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/*
-Marks as REST controller.
-
-Returns JSON.
-*/
+@Slf4j
 @RestController
 
 /*
@@ -82,10 +23,6 @@ Returns JSON.
  * /api/pharmacy
  */
 @RequestMapping("/api/pharmacy")
-
-/*
- * Constructor injection
- */
 @RequiredArgsConstructor
 public class PharmacyController {
 
