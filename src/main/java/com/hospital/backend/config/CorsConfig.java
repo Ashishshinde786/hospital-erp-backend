@@ -17,17 +17,39 @@ public class CorsConfig {
 
 		CorsConfiguration config = new CorsConfiguration();
 
-		config.setAllowedOrigins(List.of("http://localhost:4200"));
+		/*
+		 * Angular frontend URL
+		 */
+		config.setAllowedOrigins(
 
-		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+				List.of("http://localhost:4200"));
 
-		config.setAllowedHeaders(List.of("*"));
+		/*
+		 * Allowed HTTP methods
+		 */
+		config.setAllowedMethods(
 
+				List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+		/*
+		 * Allowed headers
+		 */
+		config.setAllowedHeaders(
+
+				List.of("*"));
+
+		/*
+		 * Allow credentials
+		 */
 		config.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-		source.registerCorsConfiguration("/api/**", config);
+		source.registerCorsConfiguration(
+
+				"/**",
+
+				config);
 
 		return source;
 	}
