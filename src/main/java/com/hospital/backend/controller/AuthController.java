@@ -3,7 +3,7 @@ package com.hospital.backend.controller;
 import com.hospital.backend.dto.ApiResponse;
 import com.hospital.backend.dto.AuthRequest;
 import com.hospital.backend.dto.AuthResponse;
-import com.hospital.backend.entity.User;
+import com.hospital.backend.dto.RegisterRequest;
 import com.hospital.backend.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -19,33 +19,29 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-	private final AuthService authService;
+    private final AuthService authService;
 
-	// LOGIN
-	@PostMapping("/login")
-	public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody AuthRequest request) {
+    // POST /api/auth/login
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody AuthRequest request) {
+        log.info("Login attempt: username={}", request.getUsername());
+        AuthResponse response = authService.login(request);
+        log.info("Login successful: username={}", request.getUsername());
+        return ResponseEntity.ok(ApiResponse.success(response, "Login successful"));
+    }
 
-		log.info("API CALL: Login attempt for username={}", request.getUsername());
-
-		AuthResponse response = authService.login(request);
-
-		log.info("Login successful for username={}", request.getUsername());
-
-		return ResponseEntity.ok(ApiResponse.success(response, "Login successful"));
-	}
-
-	// REGISTER
-	@PostMapping("/register")
-	// @PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<ApiResponse<AuthResponse>> register(@RequestParam String username,
-			@RequestParam String password, @RequestParam String email, @RequestParam User.Role role) {
-
-		log.info("API CALL: Register user username={} role={}", username, role);
-
-		AuthResponse response = authService.register(username, password, email, role);
-
-		log.info("User registered successfully username={}", username);
-
-		return ResponseEntity.ok(ApiResponse.success(response, "User registered successfully"));
-	}
+    // POST /api/auth/register
+    // FIX: Changed @RequestParam → @RequestBody with a RegisterRequest DTO.
+    // Sending credentials as query params is a security risk (they appear in
+    // server logs and browser history). A JSON body is safer.
+    @PostMapping("/register")
+    // @PreAuthorize("hasRole('ADMIN')") — uncomment to restrict registration to admins
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        log.info("Register: username={} role={}", request.getUsername(), request.getRole());
+        AuthResponse response = authService.register(
+                request.getUsername(), request.getPassword(),
+                request.getEmail(),    request.getRole());
+        log.info("Registered: username={}", request.getUsername());
+        return ResponseEntity.ok(ApiResponse.success(response, "User registered successfully"));
+    }
 }
