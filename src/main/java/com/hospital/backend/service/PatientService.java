@@ -108,7 +108,7 @@ public class PatientService {
 		LocalDate minDate = today.minusYears(max);
 
 		return patientRepository.findAll().stream().filter(p -> p.getDateOfBirth() != null)
-				.filter(p -> p.getDateOfBirth().isBefore(maxDate) && p.getDateOfBirth().isAfter(minDate))
+				.filter(p -> !p.getDateOfBirth().isAfter(maxDate) && !p.getDateOfBirth().isBefore(minDate))
 				.map(this::toDTO).collect(Collectors.toList());
 	}
 

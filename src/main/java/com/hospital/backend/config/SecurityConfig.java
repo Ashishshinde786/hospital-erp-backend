@@ -272,8 +272,18 @@ public class SecurityConfig {
                          * Examples:
                          * - login
                          * - register
+                         * - swagger/openapi docs
                          */
-                        .requestMatchers("/api/auth/**", "/error").permitAll()
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/error",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
 
                         /*
                          * ---------------------------------------------------------
