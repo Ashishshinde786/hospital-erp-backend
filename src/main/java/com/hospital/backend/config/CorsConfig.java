@@ -1,12 +1,5 @@
 package com.hospital.backend.config;
 
-/*
- * Spring annotation used to mark this class as a Configuration class.
- *
- * Meaning:
- * Spring Boot will scan this class during application startup
- * and register the beans defined inside it into the Spring IOC Container.
- */
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
